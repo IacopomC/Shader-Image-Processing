@@ -62,11 +62,14 @@ function init() {
 
   container.appendChild(renderer.domElement);
 
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.001, 10);
-  camera.position.z = 2;
+  const fov = 45;
+  const aspect = window.innerWidth / window.innerHeight;
+  const near = 0.1;
+  const far = 1000;
+  camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  camera.position.set(0,1,3);
+  
   controls = new OrbitControls(camera, renderer.domElement);
-  controls.minDistance = 0.005;
-  controls.maxDistance = 1.0;
   controls.enableRotate = true;
   controls.addEventListener("change", render);
   controls.update();
