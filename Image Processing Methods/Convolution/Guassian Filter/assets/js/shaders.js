@@ -12,8 +12,6 @@ const vertexShader =
 const fragmentShader = 
     `
     precision highp float;
-
-    const int kernelSizeDiv2 = 2;
     
     uniform sampler2D image;
     uniform vec2 resolution;
@@ -21,16 +19,29 @@ const fragmentShader =
     uniform float sigma;
     
     varying vec2 vUv;
+
+    const float Pi = 3.1415926538;
     
     void main(void) {
-      vec2 cellSize = 1.0 / resolution.xy;
+
       vec2 uv = vUv.xy;
+
+      vec4 textureValue = vec4(0.0);
+
+      float firstTerm = 0.0;
+      float secondTerm = 0.0;
+      float k = (kernelSize - 1.0) / 2.0;
         
-      vec4 textureValue = vec4(0, 0, 0, 0);
-      for (int i = -kernelSizeDiv2; i <= kernelSizeDiv2; i++)
-        for (int j = -kernelSizeDiv2; j <= kernelSizeDiv2; j++)
-          textureValue += texture2D(image, uv + vec2(float(i) * cellSize.x, float(j) * cellSize.y));
-      textureValue /= float((kernelSizeDiv2 * 2 + 1) * (kernelSizeDiv2 * 2 + 1));
+      for (float i = 1.0; i <= kernelSize; i++) {
+        for (float j = 1.0; j <= kernelSize; j++) {
+          firstTerm = (i-(k+1.0))*(i-(k+1.0));
+          secondTerm = (j-(k+1.0))*(j-(k+1.0));
+          textureValue += texture2D( image, uv + vec2(exp(-(firstTerm + secondTerm)/(sigma*sigma))));
+        }
+      }
+      
+      textureValue /= (2.0*Pi*sigma*sigma);
+        
       gl_FragColor = textureValue;
     }
     `
