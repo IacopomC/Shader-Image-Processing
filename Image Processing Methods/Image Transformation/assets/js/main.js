@@ -102,6 +102,7 @@ function init() {
     var material = new THREE.MeshBasicMaterial({ map: imageProcessing.rtt.texture, side: THREE.DoubleSide });
     let planeR = new THREE.Mesh(geometry, material);
     planeR.position.x = 0.6;
+    planeR.position.z = -0.02;
     planeR.receiveShadow = false;
     planeR.castShadow = false;
     scene.add(planeR);
@@ -115,7 +116,7 @@ function init() {
     scene.add(plane);
 
     gui = new GUI();
-    gui.add(imageProcessingMaterial.uniforms.scaleFactor, "value", 0.1, 2).name("Scale").onChange(
+    gui.add(imageProcessingMaterial.uniforms.scaleFactor, "value", 0.1, 3).name("Scale").onChange(
       (scaleFactor) => {
         planeR.scale.set(scaleFactor, scaleFactor, 1);
       }
