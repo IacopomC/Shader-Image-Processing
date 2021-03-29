@@ -29,7 +29,7 @@ const fragmentShader =
       vec2 cellSize = 1.0 / resolution.xy;
       vec2 uv = vUv.xy;
     
-      uv = scale(scaleFactor) * uv;
+      uv = scale(scaleFactor) * (uv - 0.5) + 0.5;
     
       vec4 textureValue = vec4(0, 0, 0, 0);
       for (int i = -kernelSizeDiv2; i <= kernelSizeDiv2; i++)
