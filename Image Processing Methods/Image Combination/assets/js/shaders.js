@@ -21,6 +21,8 @@ const fragmentShader =
     uniform vec2 resolution;
     uniform float scaleFactor;
     uniform int operator;
+    uniform float offsetX;
+    uniform float offsetY;
     
     varying vec2 vUv;
 
@@ -32,6 +34,7 @@ const fragmentShader =
     void main(void) {
       vec2 cellSize = 1.0 / resolution.xy;
       vec2 uv = vUv.xy;
+      vec2 offset = vec2(offsetX, offsetY);
     
       uv = scale(scaleFactor) * (uv - 0.5) + 0.5;
     
