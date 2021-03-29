@@ -91,6 +91,7 @@ function init() {
         operator: {type: "i", value: 0},
         offset: {type: "i", value: 0},
         image: {type: "t", value: imageTexture},
+        image2: {type: "t", value: imageTexture},
         resolution: {type: "2f", value: new THREE.Vector2(imageTexture.image.width, imageTexture.image.height),
         },
       },
