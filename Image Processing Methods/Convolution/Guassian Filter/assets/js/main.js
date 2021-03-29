@@ -1,6 +1,6 @@
-import * as THREE from '../../../../../node_modules/three/build/three.module.js';
-import { OrbitControls } from '../../../../../node_modules/three/examples/jsm/controls/OrbitControls.js';
-import {GUI} from "../../../../../node_modules/three/examples/jsm/libs/dat.gui.module.js";
+import * as THREE from '../../../../../../node_modules/three/build/three.module.js';
+import { OrbitControls } from '../../../../../../node_modules/three/examples/jsm/controls/OrbitControls.js';
+import {GUI} from "../../../../../../node_modules/three/examples/jsm/libs/dat.gui.module.js";
 
 import {vertexShader, fragmentShader} from "./shaders.js";
 
@@ -87,7 +87,8 @@ function init() {
     imageProcessingMaterial = new THREE.ShaderMaterial({
       uniforms: {
         time: { type: "f", value: 1.0 },
-        scaleFactor: { type: 'f', value: 1.0 },
+        kernelSize: { type: 'f', value: 1.0 },
+        sigma: { type: 'f', value: 1.0 },
         image: {type: "t", value: imageTexture},
         resolution: {type: "2f", value: new THREE.Vector2(imageTexture.image.width, imageTexture.image.height),
         },
@@ -116,11 +117,8 @@ function init() {
     scene.add(plane);
 
     gui = new GUI();
-    gui.add(imageProcessingMaterial.uniforms.scaleFactor, "value", 0.1, 3).name("Scale").onChange(
-      (scaleFactor) => {
-        planeR.scale.set(scaleFactor, scaleFactor, 1);
-      }
-    );
+    gui.add(imageProcessingMaterial.uniforms.kernelSize, "value", 0.0, 5).name("Kernel");
+    gui.add(imageProcessingMaterial.uniforms.sigma, "value", 0.0, 5).name("Sigma");
     
   };
 
