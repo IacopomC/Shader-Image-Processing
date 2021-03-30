@@ -36,7 +36,7 @@ const fragmentShader =
       vec2 uv = vUv.xy;
       vec2 offset = vec2(offsetX, offsetY);
     
-      uv = scale(scaleFactor) * (uv - offset);
+      uv = scale(scaleFactor) * (uv - offset - 0.5) + 0.5;
     
       vec4 textureValue = vec4(0, 0, 0, 0);
       vec4 textureValue2 = vec4(0, 0, 0, 0);
