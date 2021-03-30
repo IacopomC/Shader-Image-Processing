@@ -16,7 +16,6 @@ const fragmentShader =
     uniform sampler2D image;
     uniform vec2 resolution;
     uniform float kernelSize;
-    uniform float sigma;
     
     varying vec2 vUv;
 
@@ -24,20 +23,24 @@ const fragmentShader =
     
     void main(void) {
 
+      vec2 cellSize = 1.0 / resolution.xy;
       vec2 uv = vUv.xy;
 
       vec4 textureValue = vec4(0.0);
 
-      float firstTerm = 0.0;
-      float secondTerm = 0.0;
+      float sigma = sqrt(-(kernelSize * kernelSize)/(2.0 * log(1.0/255.0)));
       float k = (kernelSize - 1.0) / 2.0;
-        
-      for (float i = 1.0; i <= kernelSize; i++) {
-        for (float j = 1.0; j <= kernelSize; j++) {
-          firstTerm = (i-(k+1.0))*(i-(k+1.0));
-          secondTerm = (j-(k+1.0))*(j-(k+1.0));
-          textureValue += texture2D( image, uv + vec2(exp(-(firstTerm + secondTerm)/(sigma*sigma))));
-        }
+      
+      // iterate over rows
+      for (float i = -k; i <= k; i++) {
+        float x = uv.x + float(i) * cellSize.x;
+        textureValue += texture2D(image, vec2(uv.x, exp(-(x*x + uv.y*uv.y)/(sigma*sigma))));
+      }
+
+      // iterate over columns
+      for (float j = -k; j <= k; j++) {
+        float y = uv.y + float(j) * cellSize.y;
+        textureValue += texture2D(image, vec2(uv.x, exp(-(y*y + uv.x*uv.x)/(sigma*sigma))));
       }
       
       textureValue /= (2.0*Pi*sigma*sigma);
