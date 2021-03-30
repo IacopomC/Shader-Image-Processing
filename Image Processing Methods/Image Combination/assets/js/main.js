@@ -78,7 +78,8 @@ function init() {
   let imageTexture;
 
   const imageElProcessing = function () {
-				
+		
+    imageTexture.wrapS = imageTexture.wrapT = THREE.RepeatWrapping;
     imageTexture.minFilter = THREE.NearestFilter;
     imageTexture.magFilter = THREE.NearestFilter;
     imageTexture.generateMipmaps = false;
