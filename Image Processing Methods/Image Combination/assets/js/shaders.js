@@ -34,16 +34,18 @@ const fragmentShader =
     void main(void) {
       vec2 cellSize = 1.0 / resolution.xy;
       vec2 uv = vUv.xy;
+      vec2 uv2 = vUv.xy;
       vec2 offset = vec2(offsetX, offsetY);
     
-      uv = scale(scaleFactor) * (uv - offset - 0.5) + 0.5;
+      uv = scale(scaleFactor) * (uv - 0.5) + 0.5;
+      uv2 = scale(scaleFactor) * (uv2 - offset - 0.5) + 0.5;
     
       vec4 textureValue = vec4(0, 0, 0, 0);
       vec4 textureValue2 = vec4(0, 0, 0, 0);
       for (int i = -kernelSizeDiv2; i <= kernelSizeDiv2; i++){
         for (int j = -kernelSizeDiv2; j <= kernelSizeDiv2; j++) {
           textureValue += texture2D(image, uv + vec2(float(i) * cellSize.x, float(j) * cellSize.y));
-          textureValue2 += texture2D(image2, uv + vec2(float(i) * cellSize.x, float(j) * cellSize.y));
+          textureValue2 += texture2D(image2, uv2 + vec2(float(i) * cellSize.x, float(j) * cellSize.y));
         }
       }
       if(operator == 0) {
