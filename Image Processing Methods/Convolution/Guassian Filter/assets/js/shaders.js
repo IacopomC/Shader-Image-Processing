@@ -16,6 +16,7 @@ const fragmentShader =
     uniform sampler2D image;
     uniform vec2 resolution;
     uniform float kernelSize;
+    uniform float sigma;
     
     varying vec2 vUv;
 
@@ -28,22 +29,21 @@ const fragmentShader =
 
       vec4 textureValue = vec4(0.0);
 
-      float sigma = sqrt(-(kernelSize * kernelSize)/(2.0 * log(1.0/255.0)));
       float k = (kernelSize - 1.0) / 2.0;
       
-      // iterate over rows
+      // rows
       for (float i = -k; i <= k; i++) {
         float x = uv.x + float(i) * cellSize.x;
-        textureValue += texture2D(image, vec2(uv.x, exp(-(x*x + uv.y*uv.y)/(sigma*sigma))));
+        textureValue += texture2D(image, vec2(x, uv.y)) * exp(-(i*i)/(2.0*sigma*sigma));
       }
 
-      // iterate over columns
+      // columns
       for (float j = -k; j <= k; j++) {
         float y = uv.y + float(j) * cellSize.y;
-        textureValue += texture2D(image, vec2(uv.x, exp(-(y*y + uv.x*uv.x)/(sigma*sigma))));
+        textureValue += texture2D(image, vec2(uv.x, y)) * exp(-(j*j)/(2.0*sigma*sigma));
       }
       
-      textureValue /= (2.0*Pi*sigma*sigma);
+      textureValue /= (sqrt(2.0*Pi)*sigma*sigma);
         
       gl_FragColor = textureValue;
     }
