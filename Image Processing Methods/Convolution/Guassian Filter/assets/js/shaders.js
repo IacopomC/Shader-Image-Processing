@@ -33,14 +33,12 @@ const fragmentShader =
       
       // rows
       for (float i = -k; i <= k; i++) {
-        float x = uv.x + float(i) * cellSize.x;
-        textureValue += texture2D(image, vec2(x, uv.y)) * exp(-(i*i)/(2.0*sigma*sigma));
-      }
-
-      // columns
-      for (float j = -k; j <= k; j++) {
-        float y = uv.y + float(j) * cellSize.y;
-        textureValue += texture2D(image, vec2(uv.x, y)) * exp(-(j*j)/(2.0*sigma*sigma));
+        for (float j = -k; j <= k; j++) {
+          float y = uv.y + float(j) * cellSize.y;
+					textureValue +=
+                texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) ) *
+                exp(-(i*i + j*j)/(2.0*sigma*sigma));
+        }
       }
       
       textureValue /= (sqrt(2.0*Pi)*sigma*sigma);
