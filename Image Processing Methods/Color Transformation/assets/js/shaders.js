@@ -15,8 +15,11 @@ const fragmentShader =
     
     uniform sampler2D image;
     uniform vec2 resolution;
+    uniform float hueAngle;
     
     varying vec2 vUv;
+
+    const float Pi = 3.1415926538;
 
     //----------------------CIE Lch----------------------
     const vec3 wref =  vec3(.95047, 1.0, 1.08883); 
@@ -54,7 +57,10 @@ const fragmentShader =
     
     void main(void) {
 
-			vec3 texColor = lch2rgb(rgb2lch(texture2D ( image, vUv ).rgb));
+      vec3 fragLCH = rgb2lch(texture2D ( image, vUv ).rgb);
+      fragLCH.z = hueAngle * Pi / 180.0;
+
+			vec3 texColor = lch2rgb(fragLCH);
       gl_FragColor = vec4(texColor, 1.0);
         
     }

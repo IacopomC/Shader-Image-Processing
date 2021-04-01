@@ -88,7 +88,7 @@ function init() {
       uniforms: {
         time: { type: "f", value: 1.0 },
         image: {type: "t", value: imageTexture},
-        hueAngle: {type: "t", value: 1.0},
+        hueAngle: {type: "f", value: 0},
         resolution: {type: "2f", value: new THREE.Vector2(imageTexture.image.width, imageTexture.image.height),
         },
       },
@@ -116,7 +116,7 @@ function init() {
     scene.add(plane);
 
     gui = new GUI();
-    gui.add(imageProcessingMaterial.uniforms.hueAngle, "value", 1, 20).name("Hue Shift");
+    gui.add(imageProcessingMaterial.uniforms.hueAngle, "value", 0, 360).name("Hue Shift");
     
   };
 
