@@ -35,10 +35,26 @@ const fragmentShader =
       vec3 lab = vec3(max(0.,116.0*c.y - 16.0), 500.0*(c.x - c.y), 200.0*(c.y - c.z)); 
       return vec3(lab.x, length(vec2(lab.y,lab.z)), atan(lab.z, lab.y));
     }
+
+    vec3 lch2rgb(in vec3 c)
+    {
+        c = vec3(c.x, cos(c.z) * c.y, sin(c.z) * c.y);
+        
+        float lg = 1./116.*(c.x + 16.);
+        vec3 xyz = vec3(wref.x*xyzR(lg + 0.002*c.y),
+                wref.y*xyzR(lg),
+                wref.z*xyzR(lg - 0.005*c.z));
+        
+        vec3 rgb = xyz*mat3( 3.2406, -1.5372,-0.4986,
+                          -0.9689,  1.8758, 0.0415,
+                          0.0557,  -0.2040, 1.0570);
+        
+        return rgb;
+    }
     
     void main(void) {
 
-			vec3 texColor = rgb2lch(texture2D ( image, vUv ).rgb);
+			vec3 texColor = lch2rgb(rgb2lch(texture2D ( image, vUv ).rgb));
       gl_FragColor = vec4(texColor, 1.0);
         
     }
