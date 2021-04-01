@@ -15,37 +15,32 @@ const fragmentShader =
     
     uniform sampler2D image;
     uniform vec2 resolution;
-    uniform float kernelSize;
-    uniform float sigma;
     
     varying vec2 vUv;
 
-    const float Pi = 3.1415926538;
+    //----------------------CIE Lch----------------------
+    const vec3 wref =  vec3(.95047, 1.0, 1.08883); 
+
+    float xyzF(float t){ return mix(pow(t,1./3.), 7.787037*t + 0.139731, step(t,0.00885645)); }
+    float xyzR(float t){ return mix(t*t*t , 0.1284185*(t - 0.139731), step(t,0.20689655)); }
+
+    vec3 rgb2lch(in vec3 c)
+    {
+      c  *= mat3( 0.4124, 0.3576, 0.1805,
+                  0.2126, 0.7152, 0.0722,
+                    0.0193, 0.1192, 0.9505);
+      c.x = xyzF(c.x/wref.x);
+      c.y = xyzF(c.y/wref.y);
+      c.z = xyzF(c.z/wref.z);
+      vec3 lab = vec3(max(0.,116.0*c.y - 16.0), 500.0*(c.x - c.y), 200.0*(c.y - c.z)); 
+      return vec3(lab.x, length(vec2(lab.y,lab.z)), atan(lab.z, lab.y));
+    }
     
     void main(void) {
 
-      vec2 cellSize = 1.0 / resolution.xy;
-      vec2 uv = vUv.xy;
-
-      vec4 textureValue = vec4(0.0);
-
-      float k = (kernelSize - 1.0) / 2.0;
-      
-      // rows
-      for (float i = -k; i <= k; i++) {
-        float x = uv.x + float(i) * cellSize.x;
-        textureValue += texture2D(image, vec2(x, uv.y)) * exp(-(i*i)/(2.0*sigma*sigma));
-      }
-
-      // columns
-      for (float j = -k; j <= k; j++) {
-        float y = uv.y + float(j) * cellSize.y;
-        textureValue += texture2D(image, vec2(uv.x, y)) * exp(-(j*j)/(2.0*sigma*sigma));
-      }
-      
-      textureValue /= (sqrt(2.0*Pi)*sigma*sigma);
+			vec3 texColor = rgb2lch(texture2D ( image, vUv ).rgb);
+      gl_FragColor = vec4(texColor, 1.0);
         
-      gl_FragColor = textureValue;
     }
     `
 

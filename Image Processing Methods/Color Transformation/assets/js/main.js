@@ -87,8 +87,6 @@ function init() {
     imageProcessingMaterial = new THREE.ShaderMaterial({
       uniforms: {
         time: { type: "f", value: 1.0 },
-        kernelSize: { type: 'i', value: 3 },
-        sigma: { type: 'f', value: 1.0 },
         image: {type: "t", value: imageTexture},
         resolution: {type: "2f", value: new THREE.Vector2(imageTexture.image.width, imageTexture.image.height),
         },
@@ -117,8 +115,6 @@ function init() {
     scene.add(plane);
 
     gui = new GUI();
-    gui.add(imageProcessingMaterial.uniforms.kernelSize, "value", 3, 20).name("Kernel Size");
-    gui.add(imageProcessingMaterial.uniforms.sigma, "value", 1, 10).name("Sigma");
     
   };
 
