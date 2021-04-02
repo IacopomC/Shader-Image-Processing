@@ -58,7 +58,7 @@ const fragmentShader =
     void main(void) {
 
       vec3 fragLCH = rgb2lch(texture2D ( image, vUv ).rgb);
-      fragLCH.z = hueAngle * Pi / 180.0;
+      fragLCH.z += hueAngle * Pi / 180.0;
 
 			vec3 texColor = lch2rgb(fragLCH);
       gl_FragColor = vec4(texColor, 1.0);
