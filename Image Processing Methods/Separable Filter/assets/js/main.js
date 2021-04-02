@@ -117,8 +117,8 @@ function init() {
     scene.add(plane);
 
     gui = new GUI();
-    gui.add(imageProcessingMaterial.uniforms.kernelSize, "value", 3, 20).name("Kernel Size");
-    gui.add(imageProcessingMaterial.uniforms.sigma, "value", 1, 10).name("Sigma");
+    gui.add(imageProcessingMaterial.uniforms.kernelSize, "value", 3, 60).name("Kernel Size");
+    gui.add(imageProcessingMaterial.uniforms.sigma, "value", 1, 30).name("Sigma");
     
   };
 
