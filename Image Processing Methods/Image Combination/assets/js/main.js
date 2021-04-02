@@ -75,7 +75,7 @@ function init() {
   controls.update();
 
   // IMAGE AND THE ASSOCIATED TEXTURE
-  let imageTexture;
+  let imageTexture, imageTexture2;
 
   const imageElProcessing = function () {
 		
@@ -85,15 +85,15 @@ function init() {
     imageTexture.generateMipmaps = false;
     imageTexture.format = THREE.RGBFormat;
 
+    
+    imageTexture2 = new THREE.TextureLoader().load("./assets/img/grenouille2.jpg");
+
     imageProcessingMaterial = new THREE.ShaderMaterial({
       uniforms: {
         time: { type: "f", value: 1.0 },
-        scaleFactor: { type: 'f', value: 1.0 },
         operator: {type: "i", value: 0},
-        offsetX: {type: 'f', value: 0.0},
-        offsetY: {type: 'f', value: 0.0},
         image: {type: "t", value: imageTexture},
-        image2: {type: "t", value: imageTexture},
+        image2: {type: "t", value: imageTexture2},
         resolution: {type: "2f", value: new THREE.Vector2(imageTexture.image.width, imageTexture.image.height),
         },
       },
@@ -121,14 +121,7 @@ function init() {
     scene.add(plane);
 
     gui = new GUI();
-    gui.add(imageProcessingMaterial.uniforms.scaleFactor, "value", 0.1, 3).name("Scale").onChange(
-      (scaleFactor) => {
-        planeR.scale.set(scaleFactor, scaleFactor, 1);
-      }
-    );
     gui.add(imageProcessingMaterial.uniforms.operator, "value", {Sum: 0, Sub: 1, Mult: 2, Div: 3}).name("Operator");
-    gui.add(imageProcessingMaterial.uniforms.offsetX, "value", 0, 1).name("Offset X");
-    gui.add(imageProcessingMaterial.uniforms.offsetY, "value", 0, 1).name("Offset Y");
   };
 
   imageTexture = new THREE.TextureLoader().load("./assets/img/grenouille.jpg", imageElProcessing);
