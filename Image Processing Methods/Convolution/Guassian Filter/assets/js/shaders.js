@@ -31,17 +31,17 @@ const fragmentShader =
 
       float k = (kernelSize - 1.0) / 2.0;
       
-      // rows
+      float kernelSum = 0.0;
       for (float i = -k; i <= k; i++) {
         for (float j = -k; j <= k; j++) {
-          float y = uv.y + float(j) * cellSize.y;
 					textureValue +=
                 texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) ) *
                 exp(-(i*i + j*j)/(2.0*sigma*sigma));
+          kernelSum += exp(-(i*i + j*j)/(2.0*sigma*sigma));
         }
       }
       
-      textureValue /= (sqrt(2.0*Pi)*sigma*sigma);
+      textureValue /= kernelSum;
         
       gl_FragColor = textureValue;
     }
