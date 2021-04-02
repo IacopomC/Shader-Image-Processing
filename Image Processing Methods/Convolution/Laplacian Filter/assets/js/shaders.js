@@ -18,7 +18,7 @@ const fragmentShader =
     
     varying vec2 vUv;
 
-    float laplacian[9] = float[9](0.0, -1.0, 0.0, -1.0, 4.0, -1.0, 0.0, -1.0, 0.0);
+    float laplacian[9] = float[9](-1.0, -1.0, -1.0, -1.0, 8.0, -1.0, -1.0, -1.0, -1.0);
 
     
     void main(void) {
@@ -26,20 +26,20 @@ const fragmentShader =
       vec2 cellSize = 1.0 / resolution.xy;
       vec2 uv = vUv.xy;
 
-      vec4 textureValue = vec4(0.0);
+      vec3 textureValue = vec3(0.0);
 
       int counter = 0;
       
       for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
 					textureValue +=
-                texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) ) *
+                texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) ).rgb *
                 laplacian[counter];
                 counter++;
         }
       }
-              
-      gl_FragColor = textureValue;
+      //textureValue = (textureValue + 8.0) / 16.0;
+      gl_FragColor = vec4 (textureValue, 1.0);
     }
     `
 
