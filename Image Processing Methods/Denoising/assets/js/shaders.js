@@ -55,6 +55,7 @@ const fragmentShader =
 
       float k = (float(kernelSize) - 1.0) / 2.0;
       int counter = 0;
+
       for (float i = -k; i <= k; i++) {
         for (float j = -k; j <= k; j++) {
 					rNeighbors[counter] =
@@ -64,7 +65,6 @@ const fragmentShader =
           bNeighbors[counter] =
                 float(texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) ).b);
           counter++;
-          //textureValue += texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) );
         }
       }
 
@@ -83,9 +83,9 @@ const fragmentShader =
         medianIndx = (counter + 1) / 2;
       }
 
-      int numEl = (counter * int(percent) / 100) / 2;
+      int numEl = (kernelSize*kernelSize * int(percent) / 100 - 1) / 2;
 
-      for (int j = (medianIndx - numEl); j <= (medianIndx - numEl); j++) {
+      for (int j = (medianIndx - numEl); j <= (medianIndx + numEl); j++) {
         rValue += rNeighbors[j];
         gValue += gNeighbors[j];
         bValue += bNeighbors[j];
