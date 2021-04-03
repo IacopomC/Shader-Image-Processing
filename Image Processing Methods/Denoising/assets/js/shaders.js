@@ -20,21 +20,29 @@ const fragmentShader =
     
     varying vec2 vUv;
 
-    float neighbors[MAX_SIZE];
+    float rNeighbors[MAX_SIZE];
+    float gNeighbors[MAX_SIZE];
+    float bNeighbors[MAX_SIZE];
     
     void main(void) {
 
       vec2 cellSize = 1.0 / resolution.xy;
       vec2 uv = vUv.xy;
 
-      vec4 textureValue = vec4(0.0);
+      float rValue = 0.0;
+      float gValue = 0.0;
+      float bValue = 0.0;
 
       float k = (float(kernelSize) - 1.0) / 2.0;
       int counter = 0;
       for (float i = -k; i <= k; i++) {
         for (float j = -k; j <= k; j++) {
-					neighbors[counter] =
-                float(texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) ));
+					rNeighbors[counter] =
+                float(texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) ).r);
+          gNeighbors[counter] =
+                float(texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) ).g);
+          bNeighbors[counter] =
+                float(texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) ).b);
           counter++;
           //textureValue += texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) );
         }
@@ -47,12 +55,28 @@ const fragmentShader =
             
           // Checking if the item at present iteration 
           // is greater than the next iteration
-          if(neighbors[j] > neighbors[j+1]){
+          if(rNeighbors[j] > rNeighbors[j+1]){
               
             // If the condition is true then swap them
-            float temp = neighbors[j];
-            neighbors[j] = neighbors[j + 1];
-            neighbors[j+1] = temp;
+            float temp = rNeighbors[j];
+            rNeighbors[j] = rNeighbors[j + 1];
+            rNeighbors[j+1] = temp;
+          }
+
+          if(gNeighbors[j] > gNeighbors[j+1]){
+              
+            // If the condition is true then swap them
+            float temp = gNeighbors[j];
+            gNeighbors[j] = gNeighbors[j + 1];
+            gNeighbors[j+1] = temp;
+          }
+
+          if(bNeighbors[j] > bNeighbors[j+1]){
+              
+            // If the condition is true then swap them
+            float temp = bNeighbors[j];
+            bNeighbors[j] = bNeighbors[j + 1];
+            bNeighbors[j+1] = temp;
           }
         }
       }
@@ -69,12 +93,16 @@ const fragmentShader =
       int numEl = (counter * int(percent) / 100) / 2;
 
       for (int j = (medianIndx - numEl); j <= (medianIndx - numEl); j++) {
-        textureValue += neighbors[j];
+        rValue += rNeighbors[j];
+        gValue += gNeighbors[j];
+        bValue += bNeighbors[j];
       }
+
+      vec3 textureValue = vec3 (rValue, gValue, bValue);
 
       textureValue /= float(numEl);
               
-      gl_FragColor = vec4(textureValue.rgb, 1.0);
+      gl_FragColor = vec4(textureValue, 1.0);
     }
     `
 

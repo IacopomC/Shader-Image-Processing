@@ -94,8 +94,7 @@ function init() {
         },
       },
       defines: {
-        MAX_SIZE : (imageTexture.image.width < imageTexture.image.height ?
-          imageTexture.image.width : imageTexture.image.height )
+        MAX_SIZE : 36
       },
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
