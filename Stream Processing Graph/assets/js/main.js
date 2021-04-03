@@ -56,7 +56,6 @@ var video, videoTexture;
 // IMAGE AND THE ASSOCIATED TEXTURE
 var imageTexture;
 
-let imageProcessing;
 let imageProcessingKN, imageProcessingMaterialKN;
 let imageProcessingGaussian, imageProcessingMaterialGaussian;
 let imageProcessingCombination, imageProcessingMaterialCombination;
@@ -173,10 +172,8 @@ function init() {
     imageProcessingScaling = new IVimageProcessing(imageProcessingCombination.rtt.width,
       imageProcessingCombination.rtt.height, imageProcessingMaterialScaling);
 
-    imageProcessing = imageProcessingScaling;
-
     var geometry = new THREE.PlaneGeometry(1, imageTexture.image.height / imageTexture.image.width);
-    var material = new THREE.MeshBasicMaterial({ map: imageProcessing.rtt.texture, side: THREE.DoubleSide });
+    var material = new THREE.MeshBasicMaterial({ map: imageProcessingScaling.rtt.texture, side: THREE.DoubleSide });
     let planeR = new THREE.Mesh(geometry, material);
     planeR.position.x = 0.6;
     planeR.position.z = -0.02;
@@ -229,10 +226,58 @@ function init() {
 
     imageProcessingKN = new IVimageProcessing(video.videoHeight, video.videoWidth, imageProcessingMaterialKN);
 
-    imageProcessing = imageProcessingKN;
+    imageProcessingMaterialGaussian = new THREE.ShaderMaterial({
+      uniforms: {
+        kernelSize: { type: 'i', value: 3 },
+        sigma: { type: 'f', value: 1.0 },
+        image: { type: "t", value: videoTexture },
+        resolution: {
+          type: "2f", value: new THREE.Vector2(video.videoWidth, video.videoHeight),
+        },
+      },
+      vertexShader: gvertexShader,
+      fragmentShader: gfragmentShader,
+    });
+
+    imageProcessingGaussian = new IVimageProcessing(video.videoWidth, video.videoHeight, imageProcessingMaterialGaussian);
+
+    imageProcessingMaterialCombination = new THREE.ShaderMaterial({
+      uniforms: {
+        operator: { type: "i", value: 0 },
+        scaleFactor: { type: "f", value: 0.0 },
+        offset: { type: "f", value: 0.0 },
+        image: { type: "t", value: imageProcessingKN.rtt.texture },
+        image2: { type: "t", value: imageProcessingGaussian.rtt.texture },
+        resolution: {
+          type: "2f", value: new THREE.Vector2(imageProcessingGaussian.rtt.width,
+            imageProcessingGaussian.rtt.height),
+        },
+      },
+      vertexShader: cvertexShader,
+      fragmentShader: cfragmentShader,
+    });
+
+    imageProcessingCombination = new IVimageProcessing(imageProcessingGaussian.rtt.width,
+      imageProcessingGaussian.rtt.height, imageProcessingMaterialCombination);
+
+    imageProcessingMaterialScaling = new THREE.ShaderMaterial({
+      uniforms: {
+        scaleFactor: { type: 'f', value: 1.0 },
+        image: { type: "t", value: imageProcessingCombination.rtt.texture },
+        resolution: {
+          type: "2f", value: new THREE.Vector2(imageProcessingCombination.rtt.width,
+            imageProcessingCombination.rtt.height),
+        },
+      },
+      vertexShader: scvertexShader,
+      fragmentShader: scfragmentShader,
+    });
+
+    imageProcessingScaling = new IVimageProcessing(imageProcessingCombination.rtt.width,
+      imageProcessingCombination.rtt.height, imageProcessingMaterialScaling);
 
     var geometry = new THREE.PlaneGeometry(1, video.videoHeight / video.videoWidth);
-    var material = new THREE.MeshBasicMaterial({ map: imageProcessing.rtt.texture, side: THREE.DoubleSide });
+    var material = new THREE.MeshBasicMaterial({ map: imageProcessingScaling.rtt.texture, side: THREE.DoubleSide });
     let planeR = new THREE.Mesh(geometry, material);
     planeR.position.x = 0.6;
     planeR.position.z = -0.02;
@@ -266,6 +311,17 @@ function init() {
     };
 
     gui = new GUI();
+    gui.add(imageProcessingMaterialCombination.uniforms.operator, "value", { Sum: 0, Sub: 1, Mult: 2, Div: 3 }).name("Operator Type");
+    gui.add(imageProcessingMaterialCombination.uniforms.scaleFactor, "value", 0.0, 5.0).name("Operator Scale Factor");
+    gui.add(imageProcessingMaterialCombination.uniforms.offset, "value", -5.0, 5.0).name("Operator Offset");
+    gui.add(imageProcessingMaterialScaling.uniforms.scaleFactor, "value", 0.1, 3).name("Operator Scale").onChange(
+      (scaleFactor) => {
+        planeR.scale.set(scaleFactor, scaleFactor, 1);
+      }
+    );
+    gui.add(imageProcessingMaterialGaussian.uniforms.kernelSize, "value", 3, 60).name("Gaussian Kernel Size");
+    gui.add(imageProcessingMaterialGaussian.uniforms.sigma, "value", 1, 30).name("Gaussian Sigma");
+
     gui.add(pausePlayObj, 'pausePlay').name('Pause/play video');
     gui.add(pausePlayObj, 'add10sec').name('Add 10 seconds');
 
