@@ -32,13 +32,19 @@ const gfragmentShader =
       float k = (kernelSize - 1.0) / 2.0;
       
       float kernelSum = 0.0;
+
+      // rows
       for (float i = -k; i <= k; i++) {
-        for (float j = -k; j <= k; j++) {
-					textureValue +=
-                texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) ) *
-                exp(-(i*i + j*j)/(2.0*sigma*sigma));
-          kernelSum += exp(-(i*i + j*j)/(2.0*sigma*sigma));
-        }
+        float x = uv.x + i * cellSize.x;
+        textureValue += texture2D(image, vec2(x, uv.y)) * exp(-(i*i)/(2.0*sigma*sigma));
+        kernelSum += exp(-(i*i)/(2.0*sigma*sigma));
+      }
+
+      // columns
+      for (float j = -k; j <= k; j++) {
+        float y = uv.y + j * cellSize.y;
+        textureValue += texture2D(image, vec2(uv.x, y)) * exp(-(j*j)/(2.0*sigma*sigma));
+        kernelSum += exp(-(j*j)/(2.0*sigma*sigma));
       }
       
       textureValue /= kernelSum;
