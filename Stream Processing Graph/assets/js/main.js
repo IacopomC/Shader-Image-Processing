@@ -3,6 +3,9 @@ import { OrbitControls } from '../../../../../../node_modules/three/examples/jsm
 import { GUI } from "../../../../../../node_modules/three/examples/jsm/libs/dat.gui.module.js";
 
 import { knvertexShader, knfragmentShader } from "./knshaders.js";
+import { gvertexShader, gfragmentShader } from "./gshaders.js";
+import { cvertexShader, cfragmentShader } from "./cshaders.js";
+import { scvertexShader, scfragmentShader } from "./scshaders.js";
 
 function IVimageProcessing(height, width, imageProcessingMaterial) {
 
@@ -31,9 +34,16 @@ function IVimageProcessing(height, width, imageProcessingMaterial) {
   this.scene.add(new THREE.Mesh(geom, imageProcessingMaterial));
 }
 
-function IVprocess(imageProcessing, renderer) {
-  renderer.setRenderTarget(imageProcessing.rtt);
-  renderer.render(imageProcessing.scene, imageProcessing.orthoCamera);
+function IVprocess(imageProcessingKN, imageProcessingGaussian,
+  imageProcessingCombination, imageProcessingScaling, renderer) {
+  renderer.setRenderTarget(imageProcessingKN.rtt);
+  renderer.render(imageProcessingKN.scene, imageProcessingKN.orthoCamera);
+  renderer.setRenderTarget(imageProcessingGaussian.rtt);
+  renderer.render(imageProcessingGaussian.scene, imageProcessingGaussian.orthoCamera);
+  renderer.setRenderTarget(imageProcessingCombination.rtt);
+  renderer.render(imageProcessingCombination.scene, imageProcessingCombination.orthoCamera);
+  renderer.setRenderTarget(imageProcessingScaling.rtt);
+  renderer.render(imageProcessingScaling.scene, imageProcessingScaling.orthoCamera);
   renderer.setRenderTarget(null);
 }
 
@@ -46,7 +56,11 @@ var video, videoTexture;
 // IMAGE AND THE ASSOCIATED TEXTURE
 var imageTexture;
 
-let imageProcessing, imageProcessingMaterial;
+let imageProcessing;
+let imageProcessingKN, imageProcessingMaterialKN;
+let imageProcessingGaussian, imageProcessingMaterialGaussian;
+let imageProcessingCombination, imageProcessingMaterialCombination;
+let imageProcessingScaling, imageProcessingMaterialScaling;
 
 // GUI
 let gui;
@@ -91,7 +105,7 @@ function init() {
     imageTexture.generateMipmaps = false;
     imageTexture.format = THREE.RGBFormat;
 
-    imageProcessingMaterial = new THREE.ShaderMaterial({
+    imageProcessingMaterialKN = new THREE.ShaderMaterial({
       uniforms: {
         kernelSize: { type: 'i', value: 3 },
         percent: { type: 'f', value: 50.0 },
@@ -107,7 +121,59 @@ function init() {
       fragmentShader: knfragmentShader,
     });
 
-    imageProcessing = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterial);
+    imageProcessingKN = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterialKN);
+
+    imageProcessingMaterialGaussian = new THREE.ShaderMaterial({
+      uniforms: {
+        kernelSize: { type: 'i', value: 3 },
+        sigma: { type: 'f', value: 1.0 },
+        image: { type: "t", value: imageTexture },
+        resolution: {
+          type: "2f", value: new THREE.Vector2(imageTexture.image.width, imageTexture.image.height),
+        },
+      },
+      vertexShader: gvertexShader,
+      fragmentShader: gfragmentShader,
+    });
+
+    imageProcessingGaussian = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterialGaussian);
+
+    imageProcessingMaterialCombination = new THREE.ShaderMaterial({
+      uniforms: {
+        operator: { type: "i", value: 0 },
+        scaleFactor: { type: "f", value: 0.0 },
+        offset: { type: "f", value: 0.0 },
+        image: { type: "t", value: imageProcessingKN.rtt.texture },
+        image2: { type: "t", value: imageProcessingGaussian.rtt.texture },
+        resolution: {
+          type: "2f", value: new THREE.Vector2(imageProcessingGaussian.rtt.width,
+            imageProcessingGaussian.rtt.height),
+        },
+      },
+      vertexShader: cvertexShader,
+      fragmentShader: cfragmentShader,
+    });
+
+    imageProcessingCombination = new IVimageProcessing(imageProcessingGaussian.rtt.width,
+      imageProcessingGaussian.rtt.height, imageProcessingMaterialCombination);
+
+    imageProcessingMaterialScaling = new THREE.ShaderMaterial({
+      uniforms: {
+        scaleFactor: { type: 'f', value: 1.0 },
+        image: { type: "t", value: imageProcessingCombination.rtt.texture },
+        resolution: {
+          type: "2f", value: new THREE.Vector2(imageProcessingCombination.rtt.width,
+            imageProcessingCombination.rtt.height),
+        },
+      },
+      vertexShader: scvertexShader,
+      fragmentShader: scfragmentShader,
+    });
+
+    imageProcessingScaling = new IVimageProcessing(imageProcessingCombination.rtt.width,
+      imageProcessingCombination.rtt.height, imageProcessingMaterialScaling);
+
+    imageProcessing = imageProcessingScaling;
 
     var geometry = new THREE.PlaneGeometry(1, imageTexture.image.height / imageTexture.image.width);
     var material = new THREE.MeshBasicMaterial({ map: imageProcessing.rtt.texture, side: THREE.DoubleSide });
@@ -127,8 +193,16 @@ function init() {
     scene.add(plane);
 
     gui = new GUI();
-    gui.add(imageProcessingMaterial.uniforms.kernelSize, "value", 3, 6).name("Kernel Size");
-    gui.add(imageProcessingMaterial.uniforms.percent, "value", 0, 100).name("Neighbors");
+    gui.add(imageProcessingMaterialCombination.uniforms.operator, "value", { Sum: 0, Sub: 1, Mult: 2, Div: 3 }).name("Operator");
+    gui.add(imageProcessingMaterialCombination.uniforms.scaleFactor, "value", 0.0, 5.0).name("Scale Factor");
+    gui.add(imageProcessingMaterialCombination.uniforms.offset, "value", -5.0, 5.0).name("Offset");
+    gui.add(imageProcessingMaterialScaling.uniforms.scaleFactor, "value", 0.1, 3).name("Scale").onChange(
+      (scaleFactor) => {
+        planeR.scale.set(scaleFactor, scaleFactor, 1);
+      }
+    );
+    gui.add(imageProcessingMaterialGaussian.uniforms.kernelSize, "value", 3, 60).name("Kernel Size");
+    gui.add(imageProcessingMaterialGaussian.uniforms.sigma, "value", 1, 30).name("Sigma");
 
   };
 
@@ -139,7 +213,7 @@ function init() {
     videoTexture.generateMipmaps = false;
     videoTexture.format = THREE.RGBFormat;
 
-    imageProcessingMaterial = new THREE.ShaderMaterial({
+    imageProcessingMaterialKN = new THREE.ShaderMaterial({
       uniforms: {
         kernelSize: { type: 'i', value: 3 },
         percent: { type: 'f', value: 50.0 },
@@ -153,7 +227,9 @@ function init() {
       fragmentShader: knfragmentShader,
     });
 
-    imageProcessing = new IVimageProcessing(video.videoHeight, video.videoWidth, imageProcessingMaterial);
+    imageProcessingKN = new IVimageProcessing(video.videoHeight, video.videoWidth, imageProcessingMaterialKN);
+
+    imageProcessing = imageProcessingKN;
 
     var geometry = new THREE.PlaneGeometry(1, video.videoHeight / video.videoWidth);
     var material = new THREE.MeshBasicMaterial({ map: imageProcessing.rtt.texture, side: THREE.DoubleSide });
@@ -190,8 +266,6 @@ function init() {
     };
 
     gui = new GUI();
-    gui.add(imageProcessingMaterial.uniforms.kernelSize, "value", 3, 6).name("Kernel Size");
-    gui.add(imageProcessingMaterial.uniforms.percent, "value", 0, 100).name("Neighbors");
     gui.add(pausePlayObj, 'pausePlay').name('Pause/play video');
     gui.add(pausePlayObj, 'add10sec').name('Add 10 seconds');
 
@@ -230,8 +304,12 @@ function init() {
 function render() {
   renderer.clear();
 
-  if (typeof imageProcessing !== "undefined")
-    IVprocess(imageProcessing, renderer);
+  if (typeof imageProcessingKN !== "undefined" &&
+      typeof imageProcessingGaussian !== "undefined" &&
+      typeof imageProcessingCombination !== "undefined" &&
+      typeof imageProcessingScaling !== "undefined")
+    IVprocess(imageProcessingKN, imageProcessingGaussian,
+      imageProcessingCombination, imageProcessingScaling, renderer);
   renderer.render(scene, camera);
 }
 
