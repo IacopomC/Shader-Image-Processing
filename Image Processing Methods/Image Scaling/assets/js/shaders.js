@@ -1,12 +1,11 @@
 const vertexShader = 
     `
     varying vec2 vUv;
-    uniform float scaleFactor;
 
     void main() {
       vUv = vec2( uv.x, 1.0-uv.y );
       gl_Position = projectionMatrix *
-        modelViewMatrix * vec4(scaleFactor * position, 1.0 );
+        modelViewMatrix * vec4(position, 1.0 );
     }
 `
 
@@ -18,27 +17,25 @@ const fragmentShader =
     
     uniform sampler2D image;
     uniform vec2 resolution;
-    uniform float scaleFactor;
     
     varying vec2 vUv;
-
-    mat2 scale(float scaleFactor){
-      return mat2(scaleFactor,0.0,
-                  0.0, scaleFactor);
-    }
     
     void main(void) {
       vec2 cellSize = 1.0 / resolution.xy;
       vec2 uv = vUv.xy;
-    
-      uv = scale(scaleFactor) * (uv - 0.5) + 0.5;
-    
-      vec4 textureValue = vec4(0, 0, 0, 0);
-      for (int i = -kernelSizeDiv2; i <= kernelSizeDiv2; i++)
-        for (int j = -kernelSizeDiv2; j <= kernelSizeDiv2; j++)
-          textureValue += texture2D(image, uv + vec2(float(i) * cellSize.x, float(j) * cellSize.y));
-      textureValue /= float((kernelSizeDiv2 * 2 + 1) * (kernelSizeDiv2 * 2 + 1));
-      gl_FragColor = textureValue;
+        
+      vec4 color00 = texture2D ( image, uv - vec2( cellSize.x, cellSize.y ) );
+      vec4 color01 = texture2D ( image, uv + vec2( - cellSize.x, cellSize.y ) );
+      vec4 color10 = texture2D ( image, uv + vec2( cellSize.x, - cellSize.y ) );
+      vec4 color11 = texture2D ( image, uv + vec2( cellSize.x, cellSize.y ) );
+
+      float x_diff = cellSize.x;
+      float y_diff = cellSize.y;
+
+      vec4 texColor = color01*(1.0-x_diff)*(1.0-y_diff) +  color11*(x_diff)*(1.0-y_diff)
+                        + color00*(y_diff)*(1.0-x_diff) +  color10*(x_diff*y_diff);
+
+      gl_FragColor = texColor;
     }
     `
 
