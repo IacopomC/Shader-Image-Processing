@@ -192,17 +192,17 @@ function init() {
     plane.castShadow = false;
     scene.add(plane);
 
-    gui = new GUI();
-    gui.add(imageProcessingMaterialCombination.uniforms.operator, "value", { Sum: 0, Sub: 1, Mult: 2, Div: 3 }).name("Operator");
-    gui.add(imageProcessingMaterialCombination.uniforms.scaleFactor, "value", 0.0, 5.0).name("Scale Factor");
-    gui.add(imageProcessingMaterialCombination.uniforms.offset, "value", -5.0, 5.0).name("Offset");
-    gui.add(imageProcessingMaterialScaling.uniforms.scaleFactor, "value", 0.1, 3).name("Scale").onChange(
+    gui = new GUI({width: 350});
+    gui.add(imageProcessingMaterialCombination.uniforms.operator, "value", { Sum: 0, Sub: 1, Mult: 2, Div: 3 }).name("Operator Type");
+    gui.add(imageProcessingMaterialCombination.uniforms.scaleFactor, "value", 0.0, 5.0).name("Operator Scale Factor");
+    gui.add(imageProcessingMaterialCombination.uniforms.offset, "value", -5.0, 5.0).name("Operator Offset");
+    gui.add(imageProcessingMaterialScaling.uniforms.scaleFactor, "value", 0.1, 3).name("Operator Scale").onChange(
       (scaleFactor) => {
         planeR.scale.set(scaleFactor, scaleFactor, 1);
       }
     );
-    gui.add(imageProcessingMaterialGaussian.uniforms.kernelSize, "value", 3, 60).name("Kernel Size");
-    gui.add(imageProcessingMaterialGaussian.uniforms.sigma, "value", 1, 30).name("Sigma");
+    gui.add(imageProcessingMaterialGaussian.uniforms.kernelSize, "value", 3, 60).name("Gaussian Kernel Size");
+    gui.add(imageProcessingMaterialGaussian.uniforms.sigma, "value", 1, 30).name("Gaussian Sigma");
 
   };
 
