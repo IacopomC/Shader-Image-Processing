@@ -40,6 +40,12 @@ function IVprocess(imageProcessing, renderer) {
 let camera, controls, scene, renderer, container;
 let plane;
 
+// VIDEO AND THE ASSOCIATED TEXTURE
+var video, videoTexture;
+
+// IMAGE AND THE ASSOCIATED TEXTURE
+var imageTexture;
+
 let imageProcessing, imageProcessingMaterial;
 
 // GUI
@@ -74,8 +80,9 @@ function init() {
   controls.addEventListener("change", render);
   controls.update();
 
-  // IMAGE AND THE ASSOCIATED TEXTURE
-  let imageTexture;
+  var sourceimage = new URLSearchParams(location.search).get('sourceimage');
+
+  video = document.createElement('video');
 
   const imageElProcessing = function () {
 				
@@ -120,7 +127,94 @@ function init() {
     
   };
 
-  imageTexture = new THREE.TextureLoader().load("./assets/img/grenouille.jpg", imageElProcessing);
+  const videoProcessing = function () {
+    videoTexture = new THREE.VideoTexture(video);
+    videoTexture.minFilter = THREE.NearestFilter;
+    videoTexture.magFilter = THREE.NearestFilter;
+    videoTexture.generateMipmaps = false;
+    videoTexture.format = THREE.RGBFormat;
+
+    imageProcessingMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { type: "f", value: 1.0 },
+        image: {type: "t", value: videoTexture},
+        hueAngle: {type: "f", value: 0},
+        resolution: { type: '2f', value: new THREE.Vector2(video.videoWidth, video.videoHeight) }
+      },
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
+    });
+
+    imageProcessing = new IVimageProcessing(video.videoHeight, video.videoWidth, imageProcessingMaterial);
+
+    var geometry = new THREE.PlaneGeometry(1, video.videoHeight / video.videoWidth);
+    var material = new THREE.MeshBasicMaterial({ map: imageProcessing.rtt.texture, side: THREE.DoubleSide });
+    let planeR = new THREE.Mesh(geometry, material);
+    planeR.position.x = 0.6;
+    planeR.position.z = -0.02;
+    planeR.receiveShadow = false;
+    planeR.castShadow = false;
+    scene.add(planeR);
+
+    var geometry2 = new THREE.PlaneGeometry(1, video.videoHeight / video.videoWidth);
+    var material2 = new THREE.MeshBasicMaterial({ map: videoTexture, side: THREE.DoubleSide });
+    plane = new THREE.Mesh(geometry2, material2);
+    plane.position.x = -0.6;
+    plane.receiveShadow = false;
+    plane.castShadow = false;
+    scene.add(plane);
+
+    var pausePlayObj =
+    {
+      pausePlay: function () {
+        if (!video.paused) {
+          console.log("pause");
+          video.pause();
+        }
+        else {
+          console.log("play");
+          video.play();
+        }
+      },
+      add10sec: function () {
+        video.currentTime = video.currentTime + 10;
+      }
+    };
+
+    gui = new GUI();
+    gui.add(imageProcessingMaterial.uniforms.hueAngle, "value", 0, 360).name("Hue Shift");
+    gui.add(pausePlayObj, 'pausePlay').name('Pause/play video');
+    gui.add(pausePlayObj, 'add10sec').name('Add 10 seconds');
+
+    video.play();
+  }
+
+  switch (sourceimage) {
+    case 'image':
+      imageTexture = new THREE.TextureLoader().load("../../assets/img/grenouille.jpg", imageElProcessing);
+      break;
+    case 'video':
+      video.src = '../../assets/video/video.mp4';
+      video.load();
+      video.onloadeddata = videoProcessing;
+      video.muted = true;
+      video.loop = true;
+      break;
+    case 'webcam':
+
+      const constraints = { video: { width: 1280, height: 720, facingMode: 'user' } };
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+
+        navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+          video.srcObject = stream;
+          video.play();
+          video.onloadeddata = videoProcessing;
+        });
+      }
+      break;
+    default:
+      console.log('Sorry, select valid type');
+  }
 
   window.addEventListener("resize", onWindowResize, false);
 }
