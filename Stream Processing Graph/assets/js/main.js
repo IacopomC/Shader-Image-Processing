@@ -193,7 +193,7 @@ function init() {
     gui.add(imageProcessingMaterialCombination.uniforms.operator, "value", { Sum: 0, Sub: 1, Mult: 2, Div: 3 }).name("Operator Type");
     gui.add(imageProcessingMaterialCombination.uniforms.scaleFactor, "value", 0.0, 5.0).name("Operator Scale Factor");
     gui.add(imageProcessingMaterialCombination.uniforms.offset, "value", -5.0, 5.0).name("Operator Offset");
-    gui.add(imageProcessingMaterialScaling.uniforms.scaleFactor, "value", 0.1, 3).name("Operator Scale").onChange(
+    gui.add(imageProcessingMaterialScaling.uniforms.scaleFactor, "value", 0.1, 3).name("Image Scaling").onChange(
       (scaleFactor) => {
         planeR.scale.set(scaleFactor, scaleFactor, 1);
       }
@@ -314,7 +314,7 @@ function init() {
     gui.add(imageProcessingMaterialCombination.uniforms.operator, "value", { Sum: 0, Sub: 1, Mult: 2, Div: 3 }).name("Operator Type");
     gui.add(imageProcessingMaterialCombination.uniforms.scaleFactor, "value", 0.0, 5.0).name("Operator Scale Factor");
     gui.add(imageProcessingMaterialCombination.uniforms.offset, "value", -5.0, 5.0).name("Operator Offset");
-    gui.add(imageProcessingMaterialScaling.uniforms.scaleFactor, "value", 0.1, 3).name("Operator Scale").onChange(
+    gui.add(imageProcessingMaterialScaling.uniforms.scaleFactor, "value", 0.1, 3).name("Image Scaling").onChange(
       (scaleFactor) => {
         planeR.scale.set(scaleFactor, scaleFactor, 1);
       }
