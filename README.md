@@ -1,6 +1,6 @@
 # **Image Processing with Shaders**
 
-This repository contains a series of image processing algorithms implemented using Three JS and shaders
+This repository contains a series of image processing algorithms implemented using [Three JS](https://threejs.org/) and shaders
 
 Installation
 ---
