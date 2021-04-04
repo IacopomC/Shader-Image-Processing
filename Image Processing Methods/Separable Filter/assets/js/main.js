@@ -2,7 +2,8 @@ import * as THREE from '../../../../../../node_modules/three/build/three.module.
 import { OrbitControls } from '../../../../../../node_modules/three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from "../../../../../../node_modules/three/examples/jsm/libs/dat.gui.module.js";
 
-import { vertexShader, fragmentShader } from "./shaders.js";
+import { vvertexShader, vfragmentShader,
+         hvertexShader, hfragmentShader } from "./shaders.js";
 
 function IVimageProcessing(height, width, imageProcessingMaterial) {
 
@@ -31,9 +32,11 @@ function IVimageProcessing(height, width, imageProcessingMaterial) {
   this.scene.add(new THREE.Mesh(geom, imageProcessingMaterial));
 }
 
-function IVprocess(imageProcessing, renderer) {
-  renderer.setRenderTarget(imageProcessing.rtt);
-  renderer.render(imageProcessing.scene, imageProcessing.orthoCamera);
+function IVprocess(imageProcessingHor, imageProcessingVert, renderer) {
+  renderer.setRenderTarget(imageProcessingHor.rtt);
+  renderer.render(imageProcessingHor.scene, imageProcessingHor.orthoCamera);
+  renderer.setRenderTarget(imageProcessingVert.rtt);
+  renderer.render(imageProcessingVert.scene, imageProcessingVert.orthoCamera);
   renderer.setRenderTarget(null);
 }
 
@@ -46,7 +49,8 @@ var video, videoTexture;
 // IMAGE AND THE ASSOCIATED TEXTURE
 var imageTexture;
 
-let imageProcessing, imageProcessingMaterial;
+let imageProcessingHor, imageProcessingMaterialHor;
+let imageProcessingVert, imageProcessingMaterialVert;
 
 // GUI
 let gui;
@@ -84,6 +88,11 @@ function init() {
 
   video = document.createElement('video');
 
+  let parameters = new function() {
+    this.kernelSize = 3;
+    this.sigma = 1.0;
+  };
+
   const imageElProcessing = function () {
 
     imageTexture.minFilter = THREE.NearestFilter;
@@ -91,7 +100,7 @@ function init() {
     imageTexture.generateMipmaps = false;
     imageTexture.format = THREE.RGBFormat;
 
-    imageProcessingMaterial = new THREE.ShaderMaterial({
+    imageProcessingMaterialHor = new THREE.ShaderMaterial({
       uniforms: {
         kernelSize: { type: 'i', value: 3 },
         sigma: { type: 'f', value: 1.0 },
@@ -100,14 +109,30 @@ function init() {
           type: "2f", value: new THREE.Vector2(imageTexture.image.width, imageTexture.image.height),
         },
       },
-      vertexShader: vertexShader,
-      fragmentShader: fragmentShader,
+      vertexShader: hvertexShader,
+      fragmentShader: hfragmentShader,
     });
 
-    imageProcessing = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterial);
+    imageProcessingHor = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterialHor);
+
+    imageProcessingMaterialVert = new THREE.ShaderMaterial({
+      uniforms: {
+        kernelSize: { type: 'i', value: 3 },
+        sigma: { type: 'f', value: 1.0 },
+        image: { type: "t", value: imageProcessingHor.rtt.texture },
+        resolution: {
+          type: "2f", value: new THREE.Vector2(imageProcessingHor.rtt.width,
+            imageProcessingHor.rtt.height),
+        },
+      },
+      vertexShader: vvertexShader,
+      fragmentShader: vfragmentShader,
+    });
+
+    imageProcessingVert = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterialVert);
 
     var geometry = new THREE.PlaneGeometry(1, imageTexture.image.height / imageTexture.image.width);
-    var material = new THREE.MeshBasicMaterial({ map: imageProcessing.rtt.texture, side: THREE.DoubleSide });
+    var material = new THREE.MeshBasicMaterial({ map: imageProcessingVert.rtt.texture, side: THREE.DoubleSide });
     let planeR = new THREE.Mesh(geometry, material);
     planeR.position.x = 0.6;
     planeR.position.z = -0.02;
@@ -124,8 +149,18 @@ function init() {
     scene.add(plane);
 
     gui = new GUI();
-    gui.add(imageProcessingMaterial.uniforms.kernelSize, "value", 3, 60).name("Kernel Size");
-    gui.add(imageProcessingMaterial.uniforms.sigma, "value", 1, 30).name("Sigma");
+    gui.add(parameters, "kernelSize", 3, 60).name("Kernel Size").onChange(
+      (value) => {
+        imageProcessingMaterialHor.uniforms.kernelSize.value = value;
+        imageProcessingMaterialVert.uniforms.kernelSize.value = value;
+      }
+    );
+    gui.add(parameters, "sigma", 1, 30).name("Sigma").onChange(
+      (value) => {
+        imageProcessingMaterialHor.uniforms.sigma.value = value;
+        imageProcessingMaterialVert.uniforms.sigma.value = value;
+      }
+    );
 
   };
 
@@ -224,8 +259,9 @@ function init() {
 function render() {
   renderer.clear();
 
-  if (typeof imageProcessing !== "undefined")
-    IVprocess(imageProcessing, renderer);
+  if (typeof imageProcessingHor !== "undefined" &&
+      typeof imageProcessingVert !== "undefined")
+    IVprocess(imageProcessingHor, imageProcessingVert, renderer);
   renderer.render(scene, camera);
 }
 
