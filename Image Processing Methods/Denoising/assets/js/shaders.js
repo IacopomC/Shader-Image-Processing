@@ -83,7 +83,7 @@ const fragmentShader =
         medianIndx = (counter + 1) / 2;
       }
 
-      int numEl = (kernelSize*kernelSize * int(percent) / 100 - 1) / 2;
+      int numEl = (kernelSize*kernelSize * int(percent) / 100) / 2;
 
       for (int j = (medianIndx - numEl); j <= (medianIndx + numEl); j++) {
         rValue += rNeighbors[j];
@@ -93,7 +93,9 @@ const fragmentShader =
 
       vec3 textureValue = vec3 (rValue, gValue, bValue);
 
-      textureValue /= float(numEl);
+      if (numEl >= 1) {
+        textureValue /= float(2*numEl);
+      }
               
       gl_FragColor = vec4(textureValue, 1.0);
     }
