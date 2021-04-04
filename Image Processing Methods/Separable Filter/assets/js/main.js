@@ -171,21 +171,39 @@ function init() {
     videoTexture.generateMipmaps = false;
     videoTexture.format = THREE.RGBFormat;
 
-    imageProcessingMaterial = new THREE.ShaderMaterial({
+    imageProcessingMaterialHor = new THREE.ShaderMaterial({
       uniforms: {
         kernelSize: { type: 'i', value: 3 },
         sigma: { type: 'f', value: 1.0 },
         image: { type: "t", value: videoTexture },
-        resolution: { type: '2f', value: new THREE.Vector2(video.videoWidth, video.videoHeight) }
+        resolution: {
+          type: "2f", value: new THREE.Vector2(video.videoWidth, video.videoHeight),
+        },
       },
-      vertexShader: vertexShader,
-      fragmentShader: fragmentShader,
+      vertexShader: hvertexShader,
+      fragmentShader: hfragmentShader,
     });
 
-    imageProcessing = new IVimageProcessing(video.videoHeight, video.videoWidth, imageProcessingMaterial);
+    imageProcessingHor = new IVimageProcessing(video.videoWidth, video.videoHeight, imageProcessingMaterialHor);
+
+    imageProcessingMaterialVert = new THREE.ShaderMaterial({
+      uniforms: {
+        kernelSize: { type: 'i', value: 3 },
+        sigma: { type: 'f', value: 1.0 },
+        image: { type: "t", value: imageProcessingHor.rtt.texture },
+        resolution: {
+          type: "2f", value: new THREE.Vector2(imageProcessingHor.rtt.width,
+            imageProcessingHor.rtt.height),
+        },
+      },
+      vertexShader: vvertexShader,
+      fragmentShader: vfragmentShader,
+    });
+
+    imageProcessingVert = new IVimageProcessing(imageProcessingHor.rtt.width, imageProcessingHor.rtt.height, imageProcessingMaterialVert);
 
     var geometry = new THREE.PlaneGeometry(1, video.videoHeight / video.videoWidth);
-    var material = new THREE.MeshBasicMaterial({ map: imageProcessing.rtt.texture, side: THREE.DoubleSide });
+    var material = new THREE.MeshBasicMaterial({ map: imageProcessingVert.rtt.texture, side: THREE.DoubleSide });
     let planeR = new THREE.Mesh(geometry, material);
     planeR.position.x = 0.6;
     planeR.position.z = -0.02;
@@ -219,8 +237,18 @@ function init() {
     };
 
     gui = new GUI();
-    gui.add(imageProcessingMaterial.uniforms.kernelSize, "value", 3, 60).name("Kernel Size");
-    gui.add(imageProcessingMaterial.uniforms.sigma, "value", 1, 30).name("Sigma");
+    gui.add(parameters, "kernelSize", 3, 60).name("Kernel Size").onChange(
+      (value) => {
+        imageProcessingMaterialHor.uniforms.kernelSize.value = value;
+        imageProcessingMaterialVert.uniforms.kernelSize.value = value;
+      }
+    );
+    gui.add(parameters, "sigma", 1, 30).name("Sigma").onChange(
+      (value) => {
+        imageProcessingMaterialHor.uniforms.sigma.value = value;
+        imageProcessingMaterialVert.uniforms.sigma.value = value;
+      }
+    );
     gui.add(pausePlayObj, 'pausePlay').name('Pause/play video');
     gui.add(pausePlayObj, 'add10sec').name('Add 10 seconds');
 
