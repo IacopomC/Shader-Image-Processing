@@ -38,7 +38,13 @@ const fragmentShader =
                 counter++;
         }
       }
-      //textureValue = (textureValue + 8.0) / 16.0;
+
+      // this processing is done only for visualization only
+      textureValue = abs(textureValue);
+      
+      // apply gamma correction
+      float gamma = 2.2;
+      textureValue = pow(textureValue, vec3(1.0/gamma));
       gl_FragColor = vec4 (textureValue, 1.0);
     }
     `
