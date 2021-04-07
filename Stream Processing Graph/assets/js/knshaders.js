@@ -23,6 +23,21 @@ const knfragmentShader =
     float rNeighbors[MAX_SIZE];
     float gNeighbors[MAX_SIZE];
     float bNeighbors[MAX_SIZE];
+
+    void sortArray(float array[MAX_SIZE], int n){
+      float tmp;
+      int i, j;
+      for (i = 1; i < n; i++) {
+        tmp = array[i];
+        j = i - 1;
+
+        while (j >= 0 && length(array[j]) > length(tmp)) {
+          array[j + 1] = array[j];
+          j = j - 1;
+        }
+        array[j + 1] = tmp;
+      }
+    }
     
     void main(void) {
 
@@ -35,6 +50,7 @@ const knfragmentShader =
 
       float k = (float(kernelSize) - 1.0) / 2.0;
       int counter = 0;
+
       for (float i = -k; i <= k; i++) {
         for (float j = -k; j <= k; j++) {
 					rNeighbors[counter] =
@@ -44,43 +60,15 @@ const knfragmentShader =
           bNeighbors[counter] =
                 float(texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) ).b);
           counter++;
-          //textureValue += texture2D( image, uv + vec2( float(i)*cellSize.x, float(j)*cellSize.y ) );
         }
       }
 
-      for(int i = 0; i < counter; i++){
-     
-        // Last i elements are already in place  
-        for(int j = 0; j < ( counter - i -1 ); j++){
-            
-          // Checking if the item at present iteration 
-          // is greater than the next iteration
-          if(rNeighbors[j] > rNeighbors[j+1]){
-              
-            // If the condition is true then swap them
-            float temp = rNeighbors[j];
-            rNeighbors[j] = rNeighbors[j + 1];
-            rNeighbors[j+1] = temp;
-          }
-
-          if(gNeighbors[j] > gNeighbors[j+1]){
-              
-            // If the condition is true then swap them
-            float temp = gNeighbors[j];
-            gNeighbors[j] = gNeighbors[j + 1];
-            gNeighbors[j+1] = temp;
-          }
-
-          if(bNeighbors[j] > bNeighbors[j+1]){
-              
-            // If the condition is true then swap them
-            float temp = bNeighbors[j];
-            bNeighbors[j] = bNeighbors[j + 1];
-            bNeighbors[j+1] = temp;
-          }
-        }
-      }
-
+      sortArray(rNeighbors, counter);
+      
+      sortArray(gNeighbors, counter);
+      
+      sortArray(bNeighbors, counter);
+      
       int medianIndx = 0;
 
       if (counter % 2 == 0){
@@ -90,9 +78,9 @@ const knfragmentShader =
         medianIndx = (counter + 1) / 2;
       }
 
-      int numEl = (counter * int(percent) / 100) / 2;
+      int numEl = (kernelSize*kernelSize * int(percent) / 100) / 2;
 
-      for (int j = (medianIndx - numEl); j <= (medianIndx - numEl); j++) {
+      for (int j = (medianIndx - numEl); j <= (medianIndx + numEl); j++) {
         rValue += rNeighbors[j];
         gValue += gNeighbors[j];
         bValue += bNeighbors[j];
@@ -100,7 +88,9 @@ const knfragmentShader =
 
       vec3 textureValue = vec3 (rValue, gValue, bValue);
 
-      textureValue /= float(numEl);
+      if (numEl >= 1) {
+        textureValue /= float(2*numEl);
+      }
               
       gl_FragColor = vec4(textureValue, 1.0);
     }
