@@ -24,24 +24,19 @@ const fragmentShader =
     float gNeighbors[MAX_SIZE];
     float bNeighbors[MAX_SIZE];
 
-    float[MAX_SIZE] sortArray(float array[MAX_SIZE], int counter){
-      for(int i = 0; i < counter; i++){
-     
-        // Last i elements are already in place  
-        for(int j = 0; j < ( counter - i -1 ); j++){
-            
-          // Checking if the item at present iteration 
-          // is greater than the next iteration
-          if(array[j] > array[j+1]){
-              
-            // If the condition is true then swap them
-            float temp = array[j];
-            array[j] = array[j + 1];
-            array[j+1] = temp;
-          }
+    void sortArray(float array[MAX_SIZE], int n){
+      float tmp;
+      int i, j;
+      for (i = 1; i < n; i++) {
+        tmp = array[i];
+        j = i - 1;
+
+        while (j >= 0 && length(array[j]) > length(tmp)) {
+          array[j + 1] = array[j];
+          j = j - 1;
         }
+        array[j + 1] = tmp;
       }
-      return array;
     }
     
     void main(void) {
@@ -68,11 +63,11 @@ const fragmentShader =
         }
       }
 
-      rNeighbors = sortArray(rNeighbors, counter);
+      sortArray(rNeighbors, counter);
       
-      gNeighbors = sortArray(gNeighbors, counter);
+      sortArray(gNeighbors, counter);
       
-      bNeighbors = sortArray(bNeighbors, counter);
+      sortArray(bNeighbors, counter);
       
       int medianIndx = 0;
 
