@@ -117,14 +117,9 @@ function init() {
 
     imageProcessingMaterialVert = new THREE.ShaderMaterial({
       uniforms: {
-        kernelSize: { type: 'i', value: 3 },
-        sigma: { type: 'f', value: 1.0 },
+        ...imageProcessingMaterialHor.uniforms,
         image: { type: "t", value: imageProcessingHor.rtt.texture },
-        horPass : { type: "b", value: false},
-        resolution: {
-          type: "2f", value: new THREE.Vector2(imageProcessingHor.rtt.width,
-            imageProcessingHor.rtt.height),
-        },
+        horPass : { type: "b", value: false}
       },
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
@@ -150,18 +145,8 @@ function init() {
     scene.add(plane);
 
     gui = new GUI();
-    gui.add(parameters, "kernelSize", 3, 60).name("Kernel Size").onChange(
-      (value) => {
-        imageProcessingMaterialHor.uniforms.kernelSize.value = value;
-        imageProcessingMaterialVert.uniforms.kernelSize.value = value;
-      }
-    );
-    gui.add(parameters, "sigma", 1, 30).name("Sigma").onChange(
-      (value) => {
-        imageProcessingMaterialHor.uniforms.sigma.value = value;
-        imageProcessingMaterialVert.uniforms.sigma.value = value;
-      }
-    );
+    gui.add(imageProcessingMaterialHor.uniforms.kernelSize, "value", 3, 60).name("Kernel Size");
+    gui.add(imageProcessingMaterialHor.uniforms.sigma, "value", 1, 30).name("Sigma");
 
   };
 
@@ -190,14 +175,9 @@ function init() {
 
     imageProcessingMaterialVert = new THREE.ShaderMaterial({
       uniforms: {
-        kernelSize: { type: 'i', value: 3 },
-        sigma: { type: 'f', value: 1.0 },
+        ...imageProcessingMaterialHor.uniforms,
         image: { type: "t", value: imageProcessingHor.rtt.texture },
-        horPass : { type: "b", value: false},
-        resolution: {
-          type: "2f", value: new THREE.Vector2(imageProcessingHor.rtt.width,
-            imageProcessingHor.rtt.height),
-        },
+        horPass : { type: "b", value: false}
       },
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
@@ -240,18 +220,9 @@ function init() {
     };
 
     gui = new GUI();
-    gui.add(parameters, "kernelSize", 3, 60).name("Kernel Size").onChange(
-      (value) => {
-        imageProcessingMaterialHor.uniforms.kernelSize.value = value;
-        imageProcessingMaterialVert.uniforms.kernelSize.value = value;
-      }
-    );
-    gui.add(parameters, "sigma", 1, 30).name("Sigma").onChange(
-      (value) => {
-        imageProcessingMaterialHor.uniforms.sigma.value = value;
-        imageProcessingMaterialVert.uniforms.sigma.value = value;
-      }
-    );
+    gui.add(imageProcessingMaterialHor.uniforms.kernelSize, "value", 3, 60).name("Kernel Size");
+    gui.add(imageProcessingMaterialHor.uniforms.sigma, "value", 1, 30).name("Sigma");
+
     gui.add(pausePlayObj, 'pausePlay').name('Pause/play video');
     gui.add(pausePlayObj, 'add10sec').name('Add 10 seconds');
 
