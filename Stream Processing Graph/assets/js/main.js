@@ -3,8 +3,7 @@ import { OrbitControls } from '../../../../../../node_modules/three/examples/jsm
 import { GUI } from "../../../../../../node_modules/three/examples/jsm/libs/dat.gui.module.js";
 
 import { knvertexShader, knfragmentShader } from "./knshaders.js";
-import { ghvertexShader, ghfragmentShader,
-         gvvertexShader, gvfragmentShader } from "./gshaders.js";
+import { gvertexShader, gfragmentShader } from "./gshaders.js";
 import { cvertexShader, cfragmentShader } from "./cshaders.js";
 import { scvertexShader, scfragmentShader } from "./scshaders.js";
 
@@ -35,14 +34,12 @@ function IVimageProcessing(height, width, imageProcessingMaterial) {
   this.scene.add(new THREE.Mesh(geom, imageProcessingMaterial));
 }
 
-function IVprocess(imageProcessingKN, imageProcessingHor, imageProcessingVert,
+function IVprocess(imageProcessingKN, imageProcessingGauss,
   imageProcessingCombination, imageProcessingScaling, renderer) {
   renderer.setRenderTarget(imageProcessingKN.rtt);
   renderer.render(imageProcessingKN.scene, imageProcessingKN.orthoCamera);
-  renderer.setRenderTarget(imageProcessingHor.rtt);
-  renderer.render(imageProcessingHor.scene, imageProcessingHor.orthoCamera);
-  renderer.setRenderTarget(imageProcessingVert.rtt);
-  renderer.render(imageProcessingVert.scene, imageProcessingVert.orthoCamera);
+  renderer.setRenderTarget(imageProcessingGauss.rtt);
+  renderer.render(imageProcessingGauss.scene, imageProcessingGauss.orthoCamera);
   renderer.setRenderTarget(imageProcessingCombination.rtt);
   renderer.render(imageProcessingCombination.scene, imageProcessingCombination.orthoCamera);
   renderer.setRenderTarget(imageProcessingScaling.rtt);
@@ -60,8 +57,7 @@ var video, videoTexture;
 var imageTexture;
 
 let imageProcessingKN, imageProcessingMaterialKN;
-let imageProcessingHor, imageProcessingMaterialHor;
-let imageProcessingVert, imageProcessingMaterialVert;
+let imageProcessingGauss, imageProcessingMaterialGauss;
 let imageProcessingCombination, imageProcessingMaterialCombination;
 let imageProcessingScaling, imageProcessingMaterialScaling;
 
@@ -131,36 +127,38 @@ function init() {
 
     imageProcessingKN = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterialKN);
 
-    imageProcessingMaterialHor = new THREE.ShaderMaterial({
+    imageProcessingMaterialGauss = new THREE.ShaderMaterial({
       uniforms: {
         kernelSize: { type: 'i', value: 3 },
         sigma: { type: 'f', value: 1.0 },
         image: { type: "t", value: imageTexture },
+        horPass: { type: "b", value: true},
         resolution: {
           type: "2f", value: new THREE.Vector2(imageTexture.image.width, imageTexture.image.height),
         },
       },
-      vertexShader: ghvertexShader,
-      fragmentShader: ghfragmentShader,
+      vertexShader: gvertexShader,
+      fragmentShader: gfragmentShader,
     });
 
-    imageProcessingHor = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterialHor);
+    imageProcessingGauss = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterialGauss);
 
-    imageProcessingMaterialVert = new THREE.ShaderMaterial({
+    imageProcessingMaterialGauss = new THREE.ShaderMaterial({
       uniforms: {
         kernelSize: { type: 'i', value: 3 },
         sigma: { type: 'f', value: 1.0 },
-        image: { type: "t", value: imageProcessingHor.rtt.texture },
+        image: { type: "t", value: imageProcessingGauss.rtt.texture },
+        horPass: { type: "b", value: false},
         resolution: {
-          type: "2f", value: new THREE.Vector2(imageProcessingHor.rtt.width,
-            imageProcessingHor.rtt.height),
+          type: "2f", value: new THREE.Vector2(imageProcessingGauss.rtt.width,
+            imageProcessingGauss.rtt.height),
         },
       },
-      vertexShader: gvvertexShader,
-      fragmentShader: gvfragmentShader,
+      vertexShader: gvertexShader,
+      fragmentShader: gfragmentShader,
     });
 
-    imageProcessingVert = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterialVert);
+    imageProcessingGauss = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterialGauss);
 
     imageProcessingMaterialCombination = new THREE.ShaderMaterial({
       uniforms: {
@@ -168,18 +166,18 @@ function init() {
         scaleFactor: { type: "f", value: 0.0 },
         offset: { type: "f", value: 0.0 },
         image: { type: "t", value: imageProcessingKN.rtt.texture },
-        image2: { type: "t", value: imageProcessingVert.rtt.texture },
+        image2: { type: "t", value: imageProcessingGauss.rtt.texture },
         resolution: {
-          type: "2f", value: new THREE.Vector2(imageProcessingVert.rtt.width,
-            imageProcessingVert.rtt.height),
+          type: "2f", value: new THREE.Vector2(imageProcessingKN.rtt.width,
+            imageProcessingKN.rtt.height),
         },
       },
       vertexShader: cvertexShader,
       fragmentShader: cfragmentShader,
     });
 
-    imageProcessingCombination = new IVimageProcessing(imageProcessingVert.rtt.width,
-      imageProcessingVert.rtt.height, imageProcessingMaterialCombination);
+    imageProcessingCombination = new IVimageProcessing(imageProcessingKN.rtt.width,
+      imageProcessingKN.rtt.height, imageProcessingMaterialCombination);
 
     imageProcessingMaterialScaling = new THREE.ShaderMaterial({
       uniforms: {
@@ -223,18 +221,8 @@ function init() {
         planeR.scale.set(scaleFactor, scaleFactor, 1);
       }
     );
-    gui.add(parameters, "kernelSize", 3, 60).name("Gaussian Kernel Size").onChange(
-      (value) => {
-        imageProcessingMaterialHor.uniforms.kernelSize.value = value;
-        imageProcessingMaterialVert.uniforms.kernelSize.value = value;
-      }
-    );
-    gui.add(parameters, "sigma", 1, 30).name("Gaussian Sigma").onChange(
-      (value) => {
-        imageProcessingMaterialHor.uniforms.sigma.value = value;
-        imageProcessingMaterialVert.uniforms.sigma.value = value;
-      }
-    );
+    gui.add(imageProcessingMaterialGauss.uniforms.kernelSize, "value", 3, 60).name("Gaussian Kernel Size");
+    gui.add(imageProcessingMaterialGauss.uniforms.sigma, "value", 1, 30).name("Gaussian Sigma");
   };
 
   const videoProcessing = function () {
@@ -421,11 +409,10 @@ function render() {
   renderer.clear();
 
   if (typeof imageProcessingKN !== "undefined" &&
-      typeof imageProcessingHor !== "undefined" &&
-      typeof imageProcessingVert !== "undefined" &&
+      typeof imageProcessingGauss !== "undefined" &&
       typeof imageProcessingCombination !== "undefined" &&
       typeof imageProcessingScaling !== "undefined")
-    IVprocess(imageProcessingKN, imageProcessingHor, imageProcessingVert,
+    IVprocess(imageProcessingKN, imageProcessingGauss,
       imageProcessingCombination, imageProcessingScaling, renderer);
   renderer.render(scene, camera);
 }
