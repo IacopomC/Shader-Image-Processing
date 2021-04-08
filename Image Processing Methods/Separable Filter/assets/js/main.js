@@ -2,8 +2,7 @@ import * as THREE from '../../../../../../node_modules/three/build/three.module.
 import { OrbitControls } from '../../../../../../node_modules/three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from "../../../../../../node_modules/three/examples/jsm/libs/dat.gui.module.js";
 
-import { vvertexShader, vfragmentShader,
-         hvertexShader, hfragmentShader } from "./shaders.js";
+import { vertexShader, fragmentShader } from "./shaders.js";
 
 function IVimageProcessing(height, width, imageProcessingMaterial) {
 
@@ -105,12 +104,13 @@ function init() {
         kernelSize: { type: 'i', value: 3 },
         sigma: { type: 'f', value: 1.0 },
         image: { type: "t", value: imageTexture },
+        horPass : { type: "b", value: true},
         resolution: {
           type: "2f", value: new THREE.Vector2(imageTexture.image.width, imageTexture.image.height),
         },
       },
-      vertexShader: hvertexShader,
-      fragmentShader: hfragmentShader,
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
     });
 
     imageProcessingHor = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterialHor);
@@ -120,13 +120,14 @@ function init() {
         kernelSize: { type: 'i', value: 3 },
         sigma: { type: 'f', value: 1.0 },
         image: { type: "t", value: imageProcessingHor.rtt.texture },
+        horPass : { type: "b", value: false},
         resolution: {
           type: "2f", value: new THREE.Vector2(imageProcessingHor.rtt.width,
             imageProcessingHor.rtt.height),
         },
       },
-      vertexShader: vvertexShader,
-      fragmentShader: vfragmentShader,
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
     });
 
     imageProcessingVert = new IVimageProcessing(imageTexture.image.width, imageTexture.image.height, imageProcessingMaterialVert);
@@ -176,12 +177,13 @@ function init() {
         kernelSize: { type: 'i', value: 3 },
         sigma: { type: 'f', value: 1.0 },
         image: { type: "t", value: videoTexture },
+        horPass : { type: "b", value: true},
         resolution: {
           type: "2f", value: new THREE.Vector2(video.videoWidth, video.videoHeight),
         },
       },
-      vertexShader: hvertexShader,
-      fragmentShader: hfragmentShader,
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
     });
 
     imageProcessingHor = new IVimageProcessing(video.videoWidth, video.videoHeight, imageProcessingMaterialHor);
@@ -191,13 +193,14 @@ function init() {
         kernelSize: { type: 'i', value: 3 },
         sigma: { type: 'f', value: 1.0 },
         image: { type: "t", value: imageProcessingHor.rtt.texture },
+        horPass : { type: "b", value: false},
         resolution: {
           type: "2f", value: new THREE.Vector2(imageProcessingHor.rtt.width,
             imageProcessingHor.rtt.height),
         },
       },
-      vertexShader: vvertexShader,
-      fragmentShader: vfragmentShader,
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
     });
 
     imageProcessingVert = new IVimageProcessing(imageProcessingHor.rtt.width, imageProcessingHor.rtt.height, imageProcessingMaterialVert);
