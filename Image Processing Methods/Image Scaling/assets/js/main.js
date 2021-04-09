@@ -37,6 +37,15 @@ function IVprocess(imageProcessing, renderer) {
   renderer.setRenderTarget(null);
 }
 
+function benchmark() {
+  let t0 = performance.now();
+
+  IVprocess(imageProcessing, renderer);
+
+  let t1 = performance.now();
+  window.alert("Execution time " + Math.round((t1 - t0)*1000) + " microseconds.");
+}
+
 let camera, controls, scene, renderer, container;
 let plane;
 
@@ -79,6 +88,8 @@ function init() {
   controls.enableRotate = true;
   controls.addEventListener("change", render);
   controls.update();
+
+  document.getElementById ("exbtn").addEventListener ("click", benchmark);
 
   var sourceimage = new URLSearchParams(location.search).get('sourceimage');
 
