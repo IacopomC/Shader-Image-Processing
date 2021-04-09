@@ -1,6 +1,6 @@
 body { margin: 0; }
 
-.button {
+.extbtn {
   background-color: #b64c45;
   border-radius: 2px;
   border: none;
@@ -15,7 +15,7 @@ body { margin: 0; }
   top: 3%;
 }
 
-.button:hover {
+.extbtn:hover {
   background-color: white;
   color: black;
   border: 2px solid #b64c45;
