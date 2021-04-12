@@ -132,7 +132,23 @@ function init() {
     plane.castShadow = false;
     scene.add(plane);
 
+    var selectSrcObj =
+    {
+      image: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=image';
+      },
+      video: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=video';
+      },
+      webcam: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=webcam';
+      }
+    };
+
     gui = new GUI();
+    gui.add(selectSrcObj, 'image').name('Image');
+    gui.add(selectSrcObj, 'video').name('Video');
+    gui.add(selectSrcObj, 'webcam').name('Webcam');
 
   };
 
@@ -188,9 +204,25 @@ function init() {
       }
     };
 
+    var selectSrcObj =
+    {
+      image: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=image';
+      },
+      video: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=video';
+      },
+      webcam: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=webcam';
+      }
+    };
+
     gui = new GUI();
     gui.add(pausePlayObj, 'pausePlay').name('Pause/play video');
     gui.add(pausePlayObj, 'add10sec').name('Add 10 seconds');
+    gui.add(selectSrcObj, 'image').name('Image');
+    gui.add(selectSrcObj, 'video').name('Video');
+    gui.add(selectSrcObj, 'webcam').name('Webcam');
 
     video.play();
   }
