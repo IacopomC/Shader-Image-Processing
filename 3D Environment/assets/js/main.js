@@ -76,7 +76,9 @@ function init() {
   controls.addEventListener('change', render);
   controls.update();
 
-  var sourceimage = new URLSearchParams(location.search).get('sourceimage');
+  let url = location.href;
+
+  let sourceimage = new URLSearchParams(location.search).get('sourceimage');
 
   video = document.createElement('video');
 
@@ -119,11 +121,27 @@ function init() {
     plan.castShadow = false;
     scene.add(plan);
 
+    var selectSrcObj =
+    {
+      image: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=image';
+      },
+      video: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=video';
+      },
+      webcam: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=webcam';
+      }
+    };
+
     gui = new GUI();
     gui.add(imageProcessingMaterial.uniforms.colorScaleR, 'value', 0, 1).name('Red');
     gui.add(imageProcessingMaterial.uniforms.colorScaleG, 'value', 0, 1).name('Green');
     gui.add(imageProcessingMaterial.uniforms.colorScaleB, 'value', 0, 1).name('Blue');
     gui.add(imageProcessingMaterial.uniforms.invert, 'value').name('Invert');
+    gui.add(selectSrcObj, 'image').name('Image');
+    gui.add(selectSrcObj, 'video').name('Video');
+    gui.add(selectSrcObj, 'webcam').name('Webcam');
 
   };
 
@@ -184,11 +202,27 @@ function init() {
       }
     };
 
+    var selectSrcObj =
+    {
+      image: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=image';
+      },
+      video: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=video';
+      },
+      webcam: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=webcam';
+      }
+    };
+
     gui = new GUI();
     gui.add(imageProcessingMaterial.uniforms.colorScaleR, 'value', 0, 1).name('Red');
     gui.add(imageProcessingMaterial.uniforms.colorScaleG, 'value', 0, 1).name('Green');
     gui.add(imageProcessingMaterial.uniforms.colorScaleB, 'value', 0, 1).name('Blue');
     gui.add(imageProcessingMaterial.uniforms.invert, 'value').name('Invert');
+    gui.add(selectSrcObj, 'image').name('Image');
+    gui.add(selectSrcObj, 'video').name('Video');
+    gui.add(selectSrcObj, 'webcam').name('Webcam');
     gui.add(pausePlayObj, 'pausePlay').name('Pause/play video');
     gui.add(pausePlayObj, 'add10sec').name('Add 10 seconds');
 
