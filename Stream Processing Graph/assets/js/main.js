@@ -210,6 +210,20 @@ function init() {
     plane.castShadow = false;
     scene.add(plane);
 
+    var selectSrcObj =
+    {
+      image: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=image';
+      },
+      video: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=video';
+      },
+      webcam: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=webcam';
+      }
+    };
+
+
     gui = new GUI({width: 350});
     gui.add(imageProcessingMaterialCombination.uniforms.operator, "value", { Sum: 0, Sub: 1, Mult: 2, Div: 3 }).name("Operator Type");
     gui.add(imageProcessingMaterialCombination.uniforms.scaleFactor, "value", 0.0, 5.0).name("Operator Scale Factor");
@@ -221,6 +235,9 @@ function init() {
     );
     gui.add(imageProcessingMaterialHor.uniforms.kernelSize, "value", 3, 60).name("Gaussian Kernel Size");
     gui.add(imageProcessingMaterialHor.uniforms.sigma, "value", 1, 30).name("Gaussian Sigma");
+    gui.add(selectSrcObj, 'image').name('Image');
+    gui.add(selectSrcObj, 'video').name('Video');
+    gui.add(selectSrcObj, 'webcam').name('Webcam');
   };
 
   const videoProcessing = function () {
@@ -347,6 +364,20 @@ function init() {
       }
     };
 
+    var selectSrcObj =
+    {
+      image: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=image';
+      },
+      video: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=video';
+      },
+      webcam: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=webcam';
+      }
+    };
+
+
     gui = new GUI();
     gui.add(imageProcessingMaterialCombination.uniforms.operator, "value", { Sum: 0, Sub: 1, Mult: 2, Div: 3 }).name("Operator Type");
     gui.add(imageProcessingMaterialCombination.uniforms.scaleFactor, "value", 0.0, 5.0).name("Operator Scale Factor");
@@ -358,6 +389,9 @@ function init() {
     );
     gui.add(imageProcessingMaterialHor.uniforms.kernelSize, "value", 3, 60).name("Gaussian Kernel Size");
     gui.add(imageProcessingMaterialHor.uniforms.sigma, "value", 1, 30).name("Gaussian Sigma");
+    gui.add(selectSrcObj, 'image').name('Image');
+    gui.add(selectSrcObj, 'video').name('Video');
+    gui.add(selectSrcObj, 'webcam').name('Webcam');
     gui.add(pausePlayObj, 'pausePlay').name('Pause/play video');
     gui.add(pausePlayObj, 'add10sec').name('Add 10 seconds');
 
