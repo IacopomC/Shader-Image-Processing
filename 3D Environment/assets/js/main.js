@@ -220,7 +220,7 @@ function init() {
       }
       break;
     default:
-      console.log('Sorry, select valid type');
+      imageTexture = new THREE.TextureLoader().load("./assets/img/grenouille.jpg", imageElProcessing);
   }
 
 
