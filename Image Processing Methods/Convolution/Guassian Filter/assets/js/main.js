@@ -134,9 +134,25 @@ function init() {
     plane.castShadow = false;
     scene.add(plane);
 
+    var selectSrcObj =
+    {
+      image: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=image';
+      },
+      video: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=video';
+      },
+      webcam: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=webcam';
+      }
+    };
+
     gui = new GUI();
     gui.add(imageProcessingMaterial.uniforms.kernelSize, "value", 3, 20).name("Kernel Size");
     gui.add(imageProcessingMaterial.uniforms.sigma, "value", 1, 10).name("Sigma");
+    gui.add(selectSrcObj, 'image').name('Image');
+    gui.add(selectSrcObj, 'video').name('Video');
+    gui.add(selectSrcObj, 'webcam').name('Webcam');
 
   };
 
@@ -194,9 +210,25 @@ function init() {
       }
     };
 
+    var selectSrcObj =
+    {
+      image: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=image';
+      },
+      video: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=video';
+      },
+      webcam: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=webcam';
+      }
+    };
+
     gui = new GUI();
     gui.add(imageProcessingMaterial.uniforms.kernelSize, "value", 3, 20).name("Kernel Size");
     gui.add(imageProcessingMaterial.uniforms.sigma, "value", 1, 10).name("Sigma");
+    gui.add(selectSrcObj, 'image').name('Image');
+    gui.add(selectSrcObj, 'video').name('Video');
+    gui.add(selectSrcObj, 'webcam').name('Webcam');
     gui.add(pausePlayObj, 'pausePlay').name('Pause/play video');
     gui.add(pausePlayObj, 'add10sec').name('Add 10 seconds');
 
