@@ -140,10 +140,27 @@ function init() {
     plane.castShadow = false;
     scene.add(plane);
 
+    var selectSrcObj =
+    {
+      image: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=image';
+      },
+      video: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=video';
+      },
+      webcam: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=webcam';
+      }
+    };
+
+
     gui = new GUI();
     gui.add(imageProcessingMaterial.uniforms.operator, "value", { Sum: 0, Sub: 1, Mult: 2, Div: 3 }).name("Operator");
     gui.add(imageProcessingMaterial.uniforms.scaleFactor, "value", 0.0, 5.0).name("Scale Factor");
     gui.add(imageProcessingMaterial.uniforms.offset, "value", -5.0, 5.0).name("Offset");
+    gui.add(selectSrcObj, 'image').name('Image');
+    gui.add(selectSrcObj, 'video').name('Video');
+    gui.add(selectSrcObj, 'webcam').name('Webcam');
   };
 
   const videoProcessing = function () {
@@ -204,10 +221,27 @@ function init() {
       }
     };
 
+    var selectSrcObj =
+    {
+      image: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=image';
+      },
+      video: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=video';
+      },
+      webcam: function () {
+        window.location = location.origin + location.pathname + '?sourceimage=webcam';
+      }
+    };
+
+
     gui = new GUI();
     gui.add(imageProcessingMaterial.uniforms.operator, "value", { Sum: 0, Sub: 1, Mult: 2, Div: 3 }).name("Operator");
     gui.add(imageProcessingMaterial.uniforms.scaleFactor, "value", 0.0, 5.0).name("Scale Factor");
     gui.add(imageProcessingMaterial.uniforms.offset, "value", -5.0, 5.0).name("Offset");
+    gui.add(selectSrcObj, 'image').name('Image');
+    gui.add(selectSrcObj, 'video').name('Video');
+    gui.add(selectSrcObj, 'webcam').name('Webcam');
     gui.add(pausePlayObj, 'pausePlay').name('Pause/play video');
     gui.add(pausePlayObj, 'add10sec').name('Add 10 seconds');
 
