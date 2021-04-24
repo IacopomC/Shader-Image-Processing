@@ -89,7 +89,7 @@ const knfragmentShader =
       vec3 textureValue = vec3 (rValue, gValue, bValue);
 
       if (numEl >= 1) {
-        textureValue /= float(2*numEl);
+        textureValue /= float(2*numEl + 1);
       }
               
       gl_FragColor = vec4(textureValue, 1.0);
